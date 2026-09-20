@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تعلم الحروف 🐰 Learn Letters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF8EC;
+    --plum:#2B2140;
+    --coral:#FF6F61;
+    --teal:#2EC4B6;
+    --yellow:#FFD166;
+    --lilac:#B39DDB;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    height:100%;
+    margin:0;
+    background:var(--cream);
+    color:var(--plum);
+    font-family:'Baloo 2','Cairo',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:20px 16px 48px;}
+
+  header{text-align:center;padding-top:env(safe-area-inset-top,0px);}
+  h1{
+    font-family:'Cairo',sans-serif;
+    font-weight:900;
+    font-size:clamp(28px,6vw,42px);
+    margin:8px 0 4px;
+    color:var(--plum);
+  }
+  .sub{font-size:15px;opacity:.65;margin-bottom:18px;}
+
+  .toggle{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:22px;
+  }
+  .toggle button{
+    font-family:'Cairo','Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:17px;
+    padding:11px 26px;
+    border-radius:999px;
+    border:3px solid transparent;
+    cursor:pointer;
+    background:#fff;
+    color:var(--plum);
+    box-shadow:0 3px 0 rgba(43,33,64,.12);
+    transition:transform .15s ease, background .2s ease, color .2s ease;
+  }
+  .toggle button:active{transform:translateY(2px);}
+  .toggle button.active.ar{background:var(--coral);color:#fff;}
+  .toggle button.active.en{background:var(--teal);color:#fff;}
+  .toggle button:focus-visible{outline:3px solid var(--lilac);outline-offset:2px;}
+
+  .stage{
+    background:#fff;
+    border-radius:28px;
+    padding:28px 20px;
+    text-align:center;
+    margin-bottom:26px;
+    box-shadow:0 6px 0 rgba(43,33,64,.08);
+    min-height:190px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .stage .big-letter{
+    font-family:'Cairo',sans-serif;
+    font-weight:900;
+    font-size:clamp(64px,16vw,110px);
+    line-height:1;
+    color:var(--coral);
+  }
+  body.en-mode .stage .big-letter{color:var(--teal); font-family:'Baloo 2',sans-serif;}
+  .stage .emoji{font-size:clamp(48px,12vw,72px); margin:2px 0;}
+  .stage .word{
+    font-size:clamp(20px,5vw,28px);
+    font-weight:700;
+    color:var(--plum);
+  }
+  .stage .hint{font-size:13px;opacity:.5;margin-top:4px;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(72px,1fr));
+    gap:10px;
+  }
+  .letter-card{
+    background:#fff;
+    border:none;
+    border-radius:16px;
+    padding:12px 4px 10px;
+    font-family:'Cairo',sans-serif;
+    font-weight:800;
+    font-size:26px;
+    color:var(--plum);
+    cursor:pointer;
+    box-shadow:0 3px 0 rgba(43,33,64,.1);
+    transition:transform .12s ease, background .15s ease, box-shadow .12s ease;
+  }
+  body.en-mode .letter-card{font-family:'Baloo 2',sans-serif;}
+  .letter-card:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(43,33,64,.1);}
+  .letter-card.playing{background:var(--yellow);}
+  .letter-card:focus-visible{outline:3px solid var(--lilac);outline-offset:2px;}
+  .letter-card .mini{display:block;font-size:11px;font-weight:500;opacity:.55;margin-top:2px;font-family:'Baloo 2',sans-serif;}
+
+  footer{text-align:center;margin-top:28px;font-size:12px;opacity:.45;}
+
+  @media (prefers-reduced-motion: reduce){
+    .letter-card, .toggle button{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title">تعلّم الحروف</h1>
+    <div class="sub" id="subtitle">اضغط على أي حرف لتسمع صوته ومثاله</div>
+  </header>
+
+  <div class="toggle">
+    <button id="btnAr" class="active ar" onclick="setMode('ar')">🇸🇦 عربي</button>
+    <button id="btnEn" class="en" onclick="setMode('en')">🇬🇧 English</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="big-letter" id="stageLetter">أ</div>
+    <div class="emoji" id="stageEmoji">🐰</div>
+    <div class="word" id="stageWord">أرنب</div>
+    <div class="hint" id="stageHint">اضغط على حرف من الأسفل</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer id="footerNote">اصنع طفلًا سعيدًا 💛</footer>
+</div>
+
+<script>
+const DATA = {
+  ar: [
+    ["أ","أرنب","🐰"],["ب","بطة","🦆"],["ت","تفاحة","🍎"],["ث","ثعلب","🦊"],
+    ["ج","جمل","🐫"],["ح","حصان","🐴"],["خ","خروف","🐑"],["د","دب","🐻"],
+    ["ذ","ذئب","🐺"],["ر","رمان","🍑"],["ز","زرافة","🦒"],["س","سمكة","🐟"],
+    ["ش","شمس","☀️"],["ص","صقر","🦅"],["ض","ضفدع","🐸"],["ط","طائرة","✈️"],
+    ["ظ","ظبي","🦌"],["ع","عصفور","🐦"],["غ","غزال","🦌"],["ف","فيل","🐘"],
+    ["ق","قطة","🐱"],["ك","كلب","🐶"],["ل","ليمون","🍋"],["م","موز","🍌"],
+    ["ن","نحلة","🐝"],["ه","هدهد","🐦"],["و","وردة","🌹"],["ي","يد","✋"]
+  ],
+  en: [
+    ["A","Apple","🍎"],["B","Ball","⚽"],["C","Cat","🐱"],["D","Dog","🐶"],
+    ["E","Elephant","🐘"],["F","Fish","🐟"],["G","Giraffe","🦒"],["H","Hat","🎩"],
+    ["I","Ice cream","🍦"],["J","Juice","🧃"],["K","Kite","🪁"],["L","Lion","🦁"],
+    ["M","Moon","🌙"],["N","Nest","🪺"],["O","Orange","🍊"],["P","Panda","🐼"],
+    ["Q","Queen","👑"],["R","Rabbit","🐰"],["S","Sun","☀️"],["T","Tiger","🐯"],
+    ["U","Umbrella","☂️"],["V","Van","🚐"],["W","Whale","🐳"],["X","Xylophone","🎹"],
+    ["Y","Yo-yo","🪀"],["Z","Zebra","🦓"]
+  ]
+};
+
+let mode = 'ar';
+const grid = document.getElementById('grid');
+const stageLetter = document.getElementById('stageLetter');
+const stageEmoji = document.getElementById('stageEmoji');
+const stageWord = document.getElementById('stageWord');
+const stageHint = document.getElementById('stageHint');
+
+function speak(text, lang){
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    u.rate = 0.85;
+    u.pitch = 1.1;
+    window.speechSynthesis.speak(u);
+  }catch(e){ /* speech not supported, silently ignore */ }
+}
+
+function render(){
+  grid.innerHTML = '';
+  DATA[mode].forEach((item, i) => {
+    const [letter, word, emoji] = item;
+    const btn = document.createElement('button');
+    btn.className = 'letter-card';
+    btn.innerHTML = letter + '<span class="mini">' + emoji + '</span>';
+    btn.setAttribute('aria-label', letter + ' ' + word);
+    btn.onclick = () => activate(i, btn);
+    grid.appendChild(btn);
+  });
+  if (DATA[mode].length) activate(0, null, true);
+}
+
+function activate(i, btnEl, silent){
+  const [letter, word, emoji] = DATA[mode][i];
+  stageLetter.textContent = letter;
+  stageEmoji.textContent = emoji;
+  stageWord.textContent = word;
+  stageHint.textContent = mode === 'ar' ? 'استمع مرة أخرى ✨' : 'Tap again to hear it ✨';
+
+  document.querySelectorAll('.letter-card.playing').forEach(el => el.classList.remove('playing'));
+  if (btnEl) btnEl.classList.add('playing');
+
+  if (!silent){
+    const lang = mode === 'ar' ? 'ar-SA' : 'en-US';
+    speak(mode === 'ar' ? (letter + '... ' + word) : (letter + '. ' + word), lang);
+  }
+}
+
+function setMode(m){
+  mode = m;
+  document.body.classList.toggle('en-mode', m === 'en');
+  document.getElementById('btnAr').classList.toggle('active', m === 'ar');
+  document.getElementById('btnEn').classList.toggle('active', m === 'en');
+  document.documentElement.lang = m === 'ar' ? 'ar' : 'en';
+  document.documentElement.dir = m === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('title').textContent = m === 'ar' ? 'تعلّم الحروف' : 'Learn the Letters';
+  document.getElementById('subtitle').textContent = m === 'ar' ? 'اضغط على أي حرف لتسمع صوته ومثاله' : 'Tap a letter to hear its sound and example';
+  document.getElementById('footerNote').textContent = m === 'ar' ? 'اصنع طفلًا سعيدًا 💛' : 'Made for happy little learners 💛';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
